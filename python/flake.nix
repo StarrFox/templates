@@ -1,5 +1,5 @@
 {
-  description = "My Python application";
+  description = throw "change description";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -21,15 +21,14 @@
             [ pkgs.poetry2nix.defaultPoetryOverrides customOverrides ];
         };
 
-        # DON'T FORGET TO PUT YOUR PACKAGE NAME HERE, REMOVING `throw`
-        packageName = throw "put your package name here";
+        packageName = throw "change package name";
       in {
         packages.${packageName} = app;
 
         defaultPackage = self.packages.${system}.${packageName};
 
         devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [ poetry ];
+          buildInputs = with pkgs; [ poetry commitizen just ];
           inputsFrom = builtins.attrValues self.packages.${system};
         };
       });
