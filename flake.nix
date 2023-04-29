@@ -1,11 +1,9 @@
 {
   description = "My code project templates";
 
-  inputs = {
-    nixCargo.url = "github:yusdacra/nix-cargo-integration";
-  };
+  inputs = {};
 
-  outputs = { self, nixCargo }: {
+  outputs = { self }: {
     templates = {
       python = {
         path = ./python;
@@ -16,8 +14,6 @@
         path = ./rust;
         description = "Basic rust project";
       };
-
-      rust-crate = nixCargo.templates.simple-crate;
     };
   };
 }
