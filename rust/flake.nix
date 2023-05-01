@@ -25,7 +25,7 @@
         };
 
         devShell = pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [rustc cargo];
+          nativeBuildInputs = with pkgs; [ rustc cargo ];
           buildInputs = with pkgs; [ direnv just commitizen ];
         };
       }
