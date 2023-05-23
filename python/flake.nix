@@ -28,7 +28,7 @@
         defaultPackage = self.packages.${system}.${packageName};
 
         devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [ poetry commitizen just direnv ];
+          buildInputs = with pkgs; [poetry commitizen just];
           inputsFrom = builtins.attrValues self.packages.${system};
         };
       });
