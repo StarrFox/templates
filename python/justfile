@@ -1,9 +1,7 @@
-default: add commit push
-
-add:
-    git add .
+default: commit push
 
 commit:
+    git add .
     cz commit
 
 push:
@@ -14,5 +12,7 @@ bump:
     git push
     git push --tags
 
-shell:
-    poetry shell
+format:
+    isort .
+    black .
+    alejandra .
