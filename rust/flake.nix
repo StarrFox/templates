@@ -3,14 +3,20 @@
     flake-utils.url = "github:numtide/flake-utils";
     naersk.url = "github:nix-community/naersk";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    starrpkgs = {
+      url = "github:Starrfox/packages";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = {self, flake-utils, naersk, nixpkgs}:
+  outputs = {self, flake-utils, naersk, nixpkgs, starrpkgs}:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = (import nixpkgs) {
           inherit system;
         };
+
+        spkgs = starrpkgs.packages.${system};
 
         naersk' = pkgs.callPackage naersk {};
         project_cargo = builtins.fromTOML (builtins.readFile ./Cargo.toml);
@@ -25,8 +31,7 @@
         };
 
         devShell = pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [ rustc cargo ];
-          buildInputs = with pkgs; [ direnv just commitizen ];
+          packages = with pkgs; [rustc cargo just spkgs.commitizen];
         };
       }
     );
