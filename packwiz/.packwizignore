@@ -1,0 +1,8 @@
+.envrc
+flake.*
+README.md
+.direnv
+justfile
+dist
+LICENSE
+cache

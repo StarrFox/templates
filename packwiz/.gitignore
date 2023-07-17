@@ -1,0 +1,9 @@
+# nix
+result
+.direnv
+
+# exports
+*.mrpack
+
+# mod cache
+cache
