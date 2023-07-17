@@ -16,11 +16,24 @@
     };
   };
 
-  outputs = inputs @ {self, flake-parts, nix-systems, naersk, nixpkgs, starrpkgs, ...}:
+  outputs = inputs @ {
+    self,
+    flake-parts,
+    nix-systems,
+    naersk,
+    nixpkgs,
+    starrpkgs,
+    ...
+  }:
     flake-parts.lib.mkFlake {inherit inputs;} {
       debug = true;
       systems = import nix-systems;
-      perSystem = {pkgs, system, self', ...}: let
+      perSystem = {
+        pkgs,
+        system,
+        self',
+        ...
+      }: let
         spkgs = starrpkgs.packages.${system};
         naersk' = pkgs.callPackage naersk {};
         projectCargo = builtins.fromTOML (builtins.readFile ./Cargo.toml);

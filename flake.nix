@@ -3,7 +3,7 @@
 
   inputs = {};
 
-  outputs = { self }: {
+  outputs = {self}: {
     templates = {
       python = {
         path = ./python;
