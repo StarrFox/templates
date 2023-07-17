@@ -14,6 +14,11 @@
         path = ./rust;
         description = "Basic rust project";
       };
+
+      packwiz = {
+        path = ./packwiz;
+        description = "Packwiz template";
+      };
     };
   };
 }
