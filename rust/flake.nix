@@ -1,38 +1,49 @@
 {
+  description = throw "change description";
+
   inputs = {
-    flake-utils.url = "github:numtide/flake-utils";
-    naersk.url = "github:nix-community/naersk";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts/";
+    nix-systems.url = "github:nix-systems/default";
+    naersk.url = "github:nix-community/naersk";
     starrpkgs = {
-      url = "github:Starrfox/packages";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:StarrFox/packages";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        nix-systems.follows = "nix-systems";
+      };
     };
   };
 
-  outputs = {self, flake-utils, naersk, nixpkgs, starrpkgs}:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = (import nixpkgs) {
-          inherit system;
-        };
-
+  outputs = inputs @ {self, flake-parts, nix-systems, naersk, nixpkgs, starrpkgs, ...}:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      debug = true;
+      systems = import nix-systems;
+      perSystem = {pkgs, system, self', ...}: let
         spkgs = starrpkgs.packages.${system};
-
         naersk' = pkgs.callPackage naersk {};
-        project_cargo = builtins.fromTOML (builtins.readFile ./Cargo.toml);
-
-      in rec {
-        defaultPackage = naersk'.buildPackage {
-          name = throw "Need to set name";
+        projectCargo = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+        packageName = throw "change package name";
+      in {
+        packages.${packageName} = naersk'.buildPackage {
+          name = packageName;
           src = ./.;
-          # extra built inputs here
-          buildInputs = with pkgs; [];
-          version = project_cargo.package.version;
+          version = projectCargo.package.version;
         };
 
-        devShell = pkgs.mkShell {
-          packages = with pkgs; [rustc cargo just spkgs.commitizen];
+        packages.default = self'.packages.${packageName};
+
+        devShells.default = pkgs.mkShell {
+          name = packageName;
+          packages = with pkgs; [
+            rustc
+            cargo
+            just
+            spkgs.commitizen
+            alejandra
+          ];
         };
-      }
-    );
+      };
+    };
 }

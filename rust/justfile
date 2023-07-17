@@ -1,19 +1,30 @@
+# show this list
 default: run
 
+# test
 test:
     cargo test
 
+# build
 build:
     cargo build
 
+# run (debug)
 run:
     cargo run
 
+# format
+format:
+    cargo format
+    alejandra .
+
+# commit and push
 push:
     git add .
     cz commit
     git push
 
+# bump and push
 bump:
     cz bump
     git push
