@@ -3,37 +3,71 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-        starrpkgs = {
+    flake-parts.url = "github:hercules-ci/flake-parts/";
+    nix-systems.url = "github:nix-systems/default";
+    starrpkgs = {
       url = "github:StarrFox/packages";
-      inputs.nixpkgs.follows = "nixpkgs";
-    }; 
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-parts.follows = "flake-parts";
+        nix-systems.follows = "nix-systems";
+      };
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, starrpkgs }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
+  outputs = inputs @ {
+    self,
+    flake-parts,
+    nix-systems,
+    starrpkgs,
+    ...
+  }:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      debug = true;
+      systems = import nix-systems;
+      perSystem = {
+        pkgs,
+        system,
+        self',
+        ...
+      }: let
         spkgs = starrpkgs.packages.${system};
 
         customOverrides = self: super: {
-          # Overrides go here
-        };
-
-        app = pkgs.poetry2nix.mkPoetryApplication {
-          projectDir = ./.;
-          overrides =
-            [ pkgs.poetry2nix.defaultPoetryOverrides customOverrides ];
+          # look like this:
+          # uwuify = super.uwuify.overridePythonAttrs (
+          #   old: {
+          #     buildInputs = (old.buildInputs or []) ++ [super.poetry];
+          #   }
+          # );
         };
 
         packageName = throw "change package name";
       in {
-        packages.${packageName} = app;
-
-        defaultPackage = self.packages.${system}.${packageName};
-
-        devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [poetry spkgs.commitizen just alejandra black isort rnix-lsp];
+        packages.${packageName} = pkgs.poetry2nix.mkPoetryApplication {
+          projectDir = ./.;
+          preferWheels = true;
+          overrides = [
+            pkgs.poetry2nix.defaultPoetryOverrides
+            customOverrides
+          ];
+          groups = ["images"];
         };
-      });
+
+        packages.default = self'.packages.${packageName};
+
+        devShells.default = pkgs.mkShell {
+          name = packageName;
+          packages = with pkgs; [
+            poetry
+            spkgs.commitizen
+            just
+            alejandra
+            black
+            isort
+            python3Packages.vulture
+          ];
+        };
+      };
+    };
 }
