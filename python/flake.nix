@@ -51,7 +51,6 @@
             pkgs.poetry2nix.defaultPoetryOverrides
             customOverrides
           ];
-          groups = ["images"];
         };
 
         packages.default = self'.packages.${packageName};
