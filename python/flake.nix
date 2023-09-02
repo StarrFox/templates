@@ -5,21 +5,12 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts/";
     nix-systems.url = "github:nix-systems/default";
-    starrpkgs = {
-      url = "github:StarrFox/packages";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        nix-systems.follows = "nix-systems";
-      };
-    };
   };
 
   outputs = inputs @ {
     self,
     flake-parts,
     nix-systems,
-    starrpkgs,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -31,10 +22,12 @@
         self',
         ...
       }: let
-        spkgs = starrpkgs.packages.${system};
+        python = pkgs.python311;
 
         customOverrides = self: super: {
-          # look like this:
+          # looks like this:
+          # buildInputs = needed to build wheel
+          # propagatedBuildInputs = needed for running
           # uwuify = super.uwuify.overridePythonAttrs (
           #   old: {
           #     buildInputs = (old.buildInputs or []) ++ [super.poetry];
@@ -47,6 +40,7 @@
         packages.${packageName} = pkgs.poetry2nix.mkPoetryApplication {
           projectDir = ./.;
           preferWheels = true;
+          python = pkgs.python311;
           overrides = [
             pkgs.poetry2nix.defaultPoetryOverrides
             customOverrides
@@ -59,12 +53,12 @@
           name = packageName;
           packages = with pkgs; [
             (poetry.withPlugins(ps: with ps; [poetry-plugin-up]))
-            spkgs.commitizen
+            python
             just
             alejandra
-            black
-            isort
-            python3Packages.vulture
+            python.pkgs.black
+            python.pkgs.isort
+            python.pkgs.vulture
           ];
         };
       };
