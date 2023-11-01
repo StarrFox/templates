@@ -3,6 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    poetry2nix = {
+      url = "github:nix-community/poetry2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-parts.url = "github:hercules-ci/flake-parts/";
     nix-systems.url = "github:nix-systems/default";
   };
@@ -11,6 +15,7 @@
     self,
     flake-parts,
     nix-systems,
+    poetry2nix,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -35,14 +40,16 @@
           # );
         };
 
+        poetry2nix' = poetry2nix.lib.mkPoetry2Nix {inherit pkgs;};
+
         packageName = throw "change package name";
       in {
-        packages.${packageName} = pkgs.poetry2nix.mkPoetryApplication {
+        packages.${packageName} = poetry2nix'.mkPoetryApplication {
           projectDir = ./.;
           preferWheels = true;
           python = pkgs.python311;
           overrides = [
-            pkgs.poetry2nix.defaultPoetryOverrides
+            poetry2nix'.defaultPoetryOverrides
             customOverrides
           ];
         };
