@@ -1,5 +1,9 @@
 # templates
 
-my templates
+my [cookiecutter](https://github.com/cookiecutter/cookiecutter) templates
 
-mainly inspired by <https://github.com/serokell/templates/>
+## usage
+
+```shell
+> cookiecutter gh:StarrFox/templates --directory <template you want to use>
+```
