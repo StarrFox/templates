@@ -1,5 +1,5 @@
-name = "ForgotToSetName"
-author = "StarrFox"
+name = "{{ cookiecutter.project_name }}"
+author = "{{ cookiecutter.author }}"
 version = "0.1.0"
 pack-format = "packwiz:1.1.0"
 
