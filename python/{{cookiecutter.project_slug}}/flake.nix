@@ -48,7 +48,7 @@
         pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
         {% endif %}
 
-        packageName = "{{ cookiecutter.project_name }}";
+        packageName = "{{ cookiecutter.project_slug }}";
       in {
         {% if cookiecutter.use_poetry2nix %}
         packages.${packageName} = poetry2nix'.mkPoetryApplication {

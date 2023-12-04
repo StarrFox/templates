@@ -1,28 +1,18 @@
 {
-  description = throw "change description";
+  description = "{{ cookiecutter.description }}";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts/";
     nix-systems.url = "github:nix-systems/default";
     naersk.url = "github:nix-community/naersk";
-    starrpkgs = {
-      url = "github:StarrFox/packages";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-parts.follows = "flake-parts";
-        nix-systems.follows = "nix-systems";
-      };
-    };
   };
 
   outputs = inputs @ {
-    self,
     flake-parts,
     nix-systems,
     naersk,
     nixpkgs,
-    starrpkgs,
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -34,10 +24,9 @@
         self',
         ...
       }: let
-        spkgs = starrpkgs.packages.${system};
         naersk' = pkgs.callPackage naersk {};
         projectCargo = builtins.fromTOML (builtins.readFile ./Cargo.toml);
-        packageName = throw "change package name";
+        packageName = "{{ cookiecutter.project_slug }}";
       in {
         packages.${packageName} = naersk'.buildPackage {
           name = packageName;
@@ -53,7 +42,6 @@
             rustc
             cargo
             just
-            spkgs.commitizen
             alejandra
           ];
         };
