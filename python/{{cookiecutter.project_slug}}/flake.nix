@@ -1,21 +1,25 @@
 {
-  description = throw "change description";
+  description = "{{ cookiecutter.description }}";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts/";
+    nix-systems.url = "github:nix-systems/default";
+    {% if cookiecutter.use_poetry2nix %}
     poetry2nix = {
       url = "github:nix-community/poetry2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    flake-parts.url = "github:hercules-ci/flake-parts/";
-    nix-systems.url = "github:nix-systems/default";
+    {% endif %}
   };
 
   outputs = inputs @ {
     self,
     flake-parts,
     nix-systems,
+    {% if cookiecutter.use_poetry2nix %}
     poetry2nix,
+    {% endif %}
     ...
   }:
     flake-parts.lib.mkFlake {inherit inputs;} {
@@ -28,7 +32,7 @@
         ...
       }: let
         python = pkgs.python311;
-
+        {% if cookiecutter.use_poetry2nix %}
         customOverrides = self: super: {
           # looks like this:
           # buildInputs = needed to build wheel
@@ -39,11 +43,14 @@
           #   }
           # );
         };
-
         poetry2nix' = poetry2nix.lib.mkPoetry2Nix {inherit pkgs;};
+        {% else %}
+        pyproject = builtins.fromTOML (builtins.readFile ./pyproject.toml);
+        {% endif %}
 
-        packageName = throw "change package name";
+        packageName = "{{ cookiecutter.project_slug }}";
       in {
+        {% if cookiecutter.use_poetry2nix %}
         packages.${packageName} = poetry2nix'.mkPoetryApplication {
           projectDir = ./.;
           preferWheels = true;
@@ -53,6 +60,21 @@
             customOverrides
           ];
         };
+        {% else %}
+        packages.${packageName} = python.pkgs.buildPythonPackage {
+          src = ./.;
+          pname = packageName;
+          version = pyproject.tool.poetry.version;
+          format = "pyproject";
+          pythonImportsCheck = [packageName];
+          nativeBuildInputs = [
+            python.pkgs.poetry-core
+          ];
+          propagatedBuildInputs = with python.pkgs; [];
+
+          meta.mainProgram = packageName;
+        };
+        {% endif %}
 
         packages.default = self'.packages.${packageName};
 

@@ -1,5 +1,5 @@
 {
-  description = "a modpack";
+  description = "{{ cookiecutter.description }}";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -12,7 +12,6 @@
   };
 
   outputs = inputs @ {
-    self,
     flake-parts,
     nix-systems,
     packwiz,
