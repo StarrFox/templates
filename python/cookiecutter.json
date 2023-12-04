@@ -1,0 +1,8 @@
+{
+    "project_name": "Python template",
+    "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
+    "author": "StarrFox",
+    "email": "starrfox6312@gmail.com",
+    "description": "a python project",
+    "use_poetry2nix": true
+}
