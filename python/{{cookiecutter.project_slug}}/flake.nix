@@ -11,6 +11,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     {% endif %}
+    {% if cookiecutter.use_precommit %}
+    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
+    {% endif %}
   };
 
   outputs = inputs @ {
@@ -19,6 +22,9 @@
     nix-systems,
     {% if cookiecutter.use_poetry2nix %}
     poetry2nix,
+    {% endif %}
+    {% if cookiecutter.use_precommit %}
+    pre-commit-hooks,
     {% endif %}
     ...
   }:
@@ -78,8 +84,22 @@
 
         packages.default = self'.packages.${packageName};
 
+        {% if cookiecutter.use_precommit %}
+        checks = {
+          pre-commit-check = pre-commit-hooks.lib.${system}.run {
+            src = ./.;
+            hooks = {
+              black.enable = true;
+            };
+          };
+        };
+        {% endif %}
+
         devShells.default = pkgs.mkShell {
           name = packageName;
+          {% if cookiecutter.use_precommit %}
+          inherit (self'.checks.pre-commit-check) shellHook;
+          {% endif %}
           packages = with pkgs; [
             (poetry.withPlugins(ps: with ps; [poetry-plugin-up]))
             python

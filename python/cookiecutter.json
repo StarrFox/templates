@@ -4,5 +4,6 @@
     "author": "StarrFox",
     "email": "starrfox6312@gmail.com",
     "description": "a python project",
-    "use_poetry2nix": true
+    "use_poetry2nix": true,
+    "use_precommit": true
 }

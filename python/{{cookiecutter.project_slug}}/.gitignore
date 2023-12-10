@@ -135,3 +135,7 @@ dmypy.json
 # nix
 result
 .direnv
+
+{% if cookiecutter.use_precommit %}
+.pre-commit-config.yaml
+{% endif %}
