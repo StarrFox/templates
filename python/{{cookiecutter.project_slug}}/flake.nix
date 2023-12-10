@@ -90,6 +90,8 @@
             src = ./.;
             hooks = {
               black.enable = true;
+              alejandra.enable = true;
+              statix.enable = true;
             };
           };
         };
